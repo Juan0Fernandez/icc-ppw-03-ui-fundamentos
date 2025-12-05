@@ -1,9 +1,7 @@
-// src/app/features/auth/components/login/login.ts
-
 import { Component, effect, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router'; 
 import { rxResource } from '@angular/core/rxjs-interop';
 import { AuthService } from '../../../../share/service/auth/auth.service';
 import { of } from 'rxjs';
@@ -13,26 +11,27 @@ import { FormUtils } from '../../../../share/components/form-utils/form-utils';
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule], 
   templateUrl: './login.html',
   styleUrls: ['./login.css']
 })
-export class Login { // Asegúrate de que tu clase se llama LoginComponent
+export class Login { 
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute); // Inyectamos ActivatedRoute
 
   loginForm: FormGroup;
+  private returnUrl: string = '/simpsons'; // Ruta por defecto
 
   // Signal para disparar el login
   private loginTrigger = signal<{ email: string; password: string } | null>(null);
 
-  // rxResource para manejar el proceso de login (patrón moderno)
+  // rxResource para manejar el proceso de login
   loginResource = rxResource({
     params: () => this.loginTrigger(),
     stream: ({ params }) => {
       if (!params) return of(null);
-      // Llama al servicio (que ahora devuelve un Observable)
       return this.authService.loginWithEmail(params.email, params.password);
     }
   });
@@ -40,6 +39,9 @@ export class Login { // Asegúrate de que tu clase se llama LoginComponent
   formUtils = FormUtils;
 
   constructor() {
+    // Leemos el query param 'returnUrl' si existe, sino usamos '/simpsons'
+    this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/simpsons'; 
+
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]]
@@ -48,8 +50,9 @@ export class Login { // Asegúrate de que tu clase se llama LoginComponent
     // Effect para navegar cuando el login sea exitoso
     effect(() => {
       if (this.loginResource.hasValue() && this.loginResource.value()) {
-        console.log('Login exitoso, navegando a /simpsons');
-        this.router.navigate(['/simpsons']);
+        console.log('Login exitoso, navegando a:', this.returnUrl);
+        // Usamos navigateByUrl para ir a la ruta guardada
+        this.router.navigateByUrl(this.returnUrl); 
       }
     });
   }
@@ -61,8 +64,6 @@ export class Login { // Asegúrate de que tu clase se llama LoginComponent
     }
 
     const { email, password } = this.loginForm.value;
-
-    // Disparar el login actualizando el signal
     this.loginTrigger.set({ email, password });
   }
 

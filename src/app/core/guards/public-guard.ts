@@ -1,18 +1,18 @@
-// src/app/core/guards/public.guard.ts
-
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
-import { AuthService } from '../../share/service/auth/auth.service'; // << Verifica esta ruta
+import { AuthService } from '../../share/service/auth/auth.service';
 
 export const publicGuard: CanActivateFn = (route, state) => {
   const authService = inject(AuthService);
   const router = inject(Router);
 
-  // Si ya está autenticado, redirige a una ruta protegida (ej: /simpsons)
-  if (authService.userEmail) { // Chequeo síncrono del estado
+  // Si YA tiene email (está logueado), no debe ver el login
+  if (authService.userEmail) {
+    console.log('❌ PublicGuard: Usuario ya logueado, redirigiendo a Simpsons');
     router.navigate(['/simpsons']);
-    return false; // Deniega el acceso al login/registro
+    return false;
   }
 
-  return true; // Permite el acceso si no está logueado
+  // Si no está logueado, puede ver el login
+  return true;
 };

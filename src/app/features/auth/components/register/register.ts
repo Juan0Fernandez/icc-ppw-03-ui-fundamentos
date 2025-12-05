@@ -1,5 +1,3 @@
-// src/app/features/auth/components/register/register.ts
-
 import { Component, effect, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, ValidatorFn, AbstractControl } from '@angular/forms';
@@ -9,7 +7,6 @@ import { AuthService } from '../../../../share/service/auth/auth.service';
 import { of } from 'rxjs';
 import { FormUtils } from '../../../../share/components/form-utils/form-utils';
 
-
 @Component({
   selector: 'app-register',
   standalone: true,
@@ -17,7 +14,7 @@ import { FormUtils } from '../../../../share/components/form-utils/form-utils';
   templateUrl: './register.html',
   styleUrls: ['./register.css']
 })
-export class Register { // Asegúrate de que tu clase se llama RegisterComponent
+export class Register { 
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private router = inject(Router);
@@ -32,7 +29,6 @@ export class Register { // Asegúrate de que tu clase se llama RegisterComponent
     params: () => this.registerTrigger(),
     stream: ({ params }) => {
       if (!params) return of(null);
-      // Llama al método register (que ya está en AuthService)
       return this.authService.register(params.email, params.password);
     }
   });
@@ -45,28 +41,27 @@ export class Register { // Asegúrate de que tu clase se llama RegisterComponent
       password: ['', [Validators.required, Validators.minLength(6)]],
       confirmPassword: ['', [Validators.required]]
     }, {
-      validators: this.passwordMatchValidator // <-- Aplicamos el validador a nivel de formulario
+      validators: this.passwordMatchValidator 
     });
 
     // Effect para navegar cuando el registro sea exitoso
     effect(() => {
       if (this.registerResource.hasValue() && this.registerResource.value()) {
-        console.log('Registro exitoso, navegando a /simpsons');
-        this.router.navigate(['/simpsons']);
+        console.log('Registro exitoso, navegando a /home');
+        // CAMBIO: Navegar a /home según P12
+        this.router.navigate(['/home']);
       }
     });
   }
 
-  // Validador personalizado para confirmar que las contraseñas coincidan
+  // Validador personalizado
   passwordMatchValidator: ValidatorFn = (form: AbstractControl) => {
     const password = form.get('password')?.value;
     const confirmPassword = form.get('confirmPassword')?.value;
 
     if (password && confirmPassword && password !== confirmPassword) {
-      // Si no coinciden, retorna un error para el formulario
       return { passwordMismatch: true };
     }
-    // Si coinciden o uno de los campos está vacío (maneja con required), retorna null
     return null;
   };
 
@@ -77,15 +72,11 @@ export class Register { // Asegúrate de que tu clase se llama RegisterComponent
     }
 
     const { email, password } = this.registerForm.value;
-
-    // Disparar el registro actualizando el signal
     this.registerTrigger.set({ email, password });
   }
 
-  // Computed signal para el estado de carga
   loading = this.registerResource.isLoading;
 
-  // Computed signal para el mensaje de error
   errorMessage = () => {
     const error = this.registerResource.error();
     if (!error) return '';
@@ -101,15 +92,7 @@ export class Register { // Asegúrate de que tu clase se llama RegisterComponent
     return errorMessages[code] || 'Error al registrar usuario';
   }
 
-  get email() {
-    return this.registerForm.get('email');
-  }
-
-  get password() {
-    return this.registerForm.get('password');
-  }
-
-  get confirmPassword() {
-    return this.registerForm.get('confirmPassword');
-  }
+  get email() { return this.registerForm.get('email'); }
+  get password() { return this.registerForm.get('password'); }
+  get confirmPassword() { return this.registerForm.get('confirmPassword'); }
 }
