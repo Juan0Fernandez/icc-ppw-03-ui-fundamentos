@@ -1,0 +1,1 @@
+var o=class{static getFieldError(t,n){let e=t.get(n);if(!e||!e.errors)return"";let r=e.errors;return r.required?"Este campo es obligatorio.":r.email?"El correo electr\xF3nico no es v\xE1lido.":r.minlength?`M\xEDnimo ${r.minlength.requiredLength} caracteres.`:r.passwordMismatch?"Las contrase\xF1as no coinciden.":"Error de formato."}};export{o as a};
