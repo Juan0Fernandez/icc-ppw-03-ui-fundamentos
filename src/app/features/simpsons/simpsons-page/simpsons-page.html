@@ -1,63 +1,188 @@
+<section class="p-4">
+    
+    <app-breadcrumbs 
+        [items]="[
+            { label: 'Inicio', link: '/' },
+            { label: 'Simpsons', link: '/simpsons' },
+            { label: 'Personajes' }
+        ]"
+    />
 
-<section>
-      <app-breadcrumbs
-  [items]="[
-    { label: 'Inicio', link: '/' },
-    { label: 'Simpsons', link: '/simpsons' },
-    { label: 'Personajes' }
-  ]"/>
+    <div class="flex justify-end p-2 -mt-4">
+        <button (click)="logout()" class="btn btn-outline btn-error">
+            🚪 Cerrar Sesión
+        </button>
+    </div>
+    
+    <app-hero-simpsons 
+        [simpsonsCount]=" simpsonsResource.value()?.count ?? 0"
+        [totalPages]="totalPages()"
+    ></app-hero-simpsons>
+    <section>
+        <div class="mt-8">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-2xl font-bold">⭐ Mis Favoritos</h2>
+                <button 
+                    class="btn btn-sm btn-ghost"
+                    (click)="reloadFavorites()"
+                    [disabled]="loadingFavorites()"
+                >
+                    @if (loadingFavorites()) {
+                        <span class="loading loading-spinner loading-sm"></span>
+                    } @else {
+                        🔄 Actualizar
+                    }
+                </button>
+            </div>
 
-  <app-hero-simpsons [simpsonsCount]=" simpsonsResource.value()?.count ?? 0"
-    [totalPages]="totalPages()"></app-hero-simpsons>
+            @if (loadingFavorites()) {
+                <div class="flex justify-center items-center py-12">
+                    <span class="loading loading-spinner loading-lg"></span>
+                </div>
+            } @else if (favorites().length === 0) {
+                <div class="alert alert-info">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <span>No tienes favoritos aún. ¡Agrega algunos personajes!</span>
+                </div>
+            } @else {
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    @for (favorite of favorites(); track favorite.id) {
+                        <div class="card bg-base-100 shadow-xl">
+                            
+                            <figure class="px-4 pt-4">
+                                <img 
+                                [src]="favorite.image" 
+                                [alt]="favorite.nombre"
+                                class="rounded-xl h-48 w-full object-cover"
+                                onerror="this.onerror=null; this.src='https://placehold.co/400x300/a8c2f0/white?text=No+Imagen'" 
+                                />
+                            </figure>
 
-  <!-- Paginación y controles -->
-  @if (totalPages() > 0) {
-  <div class="flex gap-2 items-center h-20 mb-4">
-    <select class="select select-bordered w-32" (change)="charactersPerPage.set(+selectPerPage.value)" #selectPerPage>
-      <option value="10">10</option>
-      <option value="20">20</option>
-      <option value="50">50</option>
-      <option value="100">100</option>
-    </select>
-    <app-pagination [pages]="totalPages()" [currentPage]="paginationService.currentPage()" />
+                            <div class="card-body">
+                                <h3 class="card-title text-sm">{{ favorite.nombre }}</h3>
+                                
+                                @if (editingFavoriteId() === favorite.id) {
+                                    <form [formGroup]="editForm" class="form-control">
+                                        <input 
+                                            type="text"
+                                            formControlName="customName"
+                                            class="input input-bordered input-sm"
+                                            placeholder="Nombre personalizado"
+                                        />
+                                        <div class="flex gap-2 mt-2">
+                                            <button 
+                                                type="button"
+                                                class="btn btn-xs btn-success flex-1"
+                                                (click)="saveEditedFavorite()"
+                                            >
+                                                ✓ Guardar
+                                            </button>
+                                            <button 
+                                                type="button"
+                                                class="btn btn-xs btn-ghost flex-1"
+                                                (click)="cancelEditingFavorite()"
+                                            >
+                                                ✕ Cancelar
+                                            </button>
+                                        </div>
+                                    </form>
+                                } @else {
+                                    <p class="text-xs opacity-70">
+                                        <span class="font-semibold">Nombre personalizado:</span><br/>
+                                        {{ favorite.customName }}
+                                    </p>
+                                    
+                                    <div class="card-actions justify-end mt-2">
+                                        <button 
+                                            class="btn btn-xs btn-ghost"
+                                            (click)="startEditingFavorite(favorite)"
+                                        >
+                                            ✏️ Editar
+                                        </button>
+                                        <button 
+                                            class="btn btn-xs btn-error"
+                                            (click)="removeFromFavorites(favorite.id!)"
+                                        >
+                                            🗑️ Eliminar
+                                        </button>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </section>
+    @if (totalPages() > 0) {
+    <div class="flex gap-2 items-center h-20 mb-4 mt-8"> <select class="select select-bordered w-32" (change)="charactersPerPage.set(+selectPerPage.value)" #selectPerPage>
+            <option value="10">10</option>
+            <option value="20">20</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+        </select>
+        <app-pagination [pages]="totalPages()" [currentPage]="paginationService.currentPage()" />
 
-    <div class="flex flex-1"></div>
-  </div>
-  }
+        <div class="flex flex-1"></div>
+    </div>
+    }
 
-  <!-- Tabla de personajes -->
-  @if (simpsonsResource.hasValue()) {
-  <div class="overflow-x-auto mt-8">
-    <table class="table">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Nombre</th>
-          <th>Ocupación</th>
-          <th>Estado</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (personaje of simpsonsResource.value().results; track personaje.id) {
-        <tr>
-          <td>{{ personaje.id }}</td>
-          <td>{{ personaje.name }}</td>
-          <td>{{ personaje.occupation }}</td>
-          <td>
-            <span class="badge badge-{{ personaje.status === 'Alive' ? 'success' : 'error' }}">
-              {{ personaje.status }}
-            </span>
-          </td>
-          <td>
-            <a [routerLink]="['/simpsons', personaje.id]" class="btn btn-sm btn-primary">
-              Ver Detalle
-            </a>
-          </td>
-        </tr>
-        }
-      </tbody>
-    </table>
-  </div>
-  }
+    @if (simpsonsResource.hasValue()) {
+    <div class="overflow-x-auto mt-8">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Ocupación</th>
+                    <th>Estado</th>
+                    <th></th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (personaje of simpsonsResource.value().results; track personaje.id) {
+                <tr>
+                    <td>{{ personaje.id }}</td>
+                    <td>{{ personaje.name }}</td>
+                    <td>{{ personaje.occupation }}</td>
+                    <td>
+                        <span class="badge badge-{{ personaje.status === 'Alive' ? 'success' : 'error' }}">
+                            {{ personaje.status }}
+                        </span>
+                    </td>
+                    <td>
+                        <a [routerLink]="['/simpsons', personaje.id]" class="btn btn-sm btn-primary">
+                            Ver Detalle
+                        </a>
+                    </td>
+                    <td>
+                        @if (isFavorite(personaje.name)) {
+                            <button 
+                                class="btn btn-sm btn-ghost"
+                                disabled
+                            >
+                                ⭐ En favoritos
+                            </button>
+                        } @else {
+                            <button 
+                                class="btn btn-sm btn-primary"
+                                (click)="addToFavorites(personaje)"
+                                [disabled]="addFavoriteResource.isLoading()"
+                            >
+                                @if (addFavoriteResource.isLoading()) {
+                                    <span class="loading loading-spinner loading-sm"></span>
+                                }
+                                ⭐ Agregar
+                            </button>
+                        }
+                    </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    }
 </section>

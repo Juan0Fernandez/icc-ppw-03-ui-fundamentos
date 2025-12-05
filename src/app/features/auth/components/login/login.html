@@ -1,0 +1,96 @@
+<div class="min-h-screen flex items-center justify-center bg-linear-to-br from-primary to-secondary p-4">
+    <div class="card w-full max-w-md bg-base-100 shadow-2xl">
+        <div class="card-body">
+            
+            <div class="text-center mb-6">
+                <h1 class="text-3xl font-bold text-primary mb-2">¡Bienvenido!</h1>
+                <p class="text-base-content/70">Inicia sesión para continuar</p>
+            </div>
+
+            @if (loginResource.error()) {
+            <div class="alert alert-error mb-4">
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-6 w-6 shrink-0 stroke-current"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                </svg>
+                <span>{{ errorMessage() }}</span>
+            </div>
+            }
+
+            <form
+                [formGroup]="loginForm"
+                (ngSubmit)="onSubmit()"
+            >
+                <div class="form-control mb-6">
+                    <label class="label">
+                        <span class="label-text">Correo electrónico</span>
+                    </label>
+                    <input
+                        type="email"
+                        formControlName="email"
+                        placeholder="ejemplo@correo.com"
+                        class="input input-bordered w-full placeholder:opacity-25"
+                        [class.input-error]="email?.invalid && email?.touched"
+                    />
+                    @if (loginForm.get('email')?.invalid && loginForm.get('email')?.touched) {
+                    <span class="block text-red-500 text-sm mt-1">{{formUtils.getFieldError(loginForm,'email')}}</span>
+                    }
+                </div>
+
+                <div class="form-control mb-6">
+                    <label class="label">
+                        <span class="label-text">Contraseña</span>
+                    </label>
+                    <input
+                        type="password"
+                        formControlName="password"
+                        placeholder="••••••••"
+                        class="input input-bordered w-full placeholder:opacity-25"
+                        [class.input-error]="password?.invalid && password?.touched"
+                    />
+                    @if (loginForm.get('password')?.invalid && loginForm.get('password')?.touched) {
+                    <span
+                        class="block text-red-500 text-sm mt-1">{{formUtils.getFieldError(loginForm,'password')}}</span>
+
+                    }
+                </div>
+
+                <div class="form-control mt-6">
+                    <button
+                        type="submit"
+                        class="btn btn-primary w-full"
+                        [disabled]="loading() || loginForm.invalid"
+                    >
+                        @if (loading()) {
+                        <span class="loading loading-spinner loading-sm"></span>
+                        Iniciando sesión...
+                        } @else {
+                        Iniciar Sesión
+                        }
+                    </button>
+                </div>
+            </form>
+            
+            <div class="text-center mt-4">
+                <p class="text-sm text-base-content/70">
+                    ¿No tienes cuenta?
+                    <a
+                        routerLink="/register"
+                        class="link link-primary font-semibold"
+                    >
+                        Regístrate aquí
+                    </a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
