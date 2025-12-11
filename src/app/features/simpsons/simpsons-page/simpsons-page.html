@@ -1,19 +1,5 @@
 <section class="p-4">
     
-    <app-breadcrumbs 
-        [items]="[
-            { label: 'Inicio', link: '/' },
-            { label: 'Simpsons', link: '/simpsons' },
-            { label: 'Personajes' }
-        ]"
-    />
-
-    <div class="flex justify-end p-2 -mt-4">
-        <button (click)="logout()" class="btn btn-outline btn-error">
-            🚪 Cerrar Sesión
-        </button>
-    </div>
-    
     <app-hero-simpsons 
         [simpsonsCount]=" simpsonsResource.value()?.count ?? 0"
         [totalPages]="totalPages()"

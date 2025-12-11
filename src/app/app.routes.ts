@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth-guard';
 import { publicGuard } from './core/guards/public-guard';
+import { Home } from './features/simpsons/home/home';
 
 export const routes: Routes = [
     {
@@ -33,7 +34,7 @@ export const routes: Routes = [
     {
         // Esta ruta (home) está protegida. Si quisieras que fuera pública, elimina [authGuard].
         path: 'home',
-        loadComponent: () => import('./features/simpsons/simpson-detail-page/simpson-detail-page').then(m => m.SimpsonsDetailPage),
+        loadComponent: () => import('./features/simpsons/home/home').then(m => m.Home),
         canActivate: [authGuard] // << APLICADO: Requiere autenticación
     },
     {

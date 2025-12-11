@@ -15,7 +15,7 @@ export class ThemeService {
     }
   }
 
-  getSavedTheme(defaultTheme: string = 'light'): string {
+  getSavedTheme(defaultTheme: string = 'coffe'): string {
     try {
       return localStorage.getItem(this.THEME_KEY) ?? defaultTheme;
     } catch {
